@@ -49,6 +49,19 @@ func createTables(db *sql.DB) {
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id)
 	);
+
+	CREATE TABLE IF NOT EXISTS resumes_optimized (
+		id TEXT PRIMARY KEY,
+		resume_id TEXT NOT NULL,
+		job_id TEXT NOT NULL,
+		system_prompt TEXT NOT NULL,
+		user_prompt TEXT NOT NULL,
+		raw_text TEXT NOT NULL,
+		typst_content TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (resume_id) REFERENCES resumes(id),
+		FOREIGN KEY (job_id) REFERENCES jobs(id)
+	);
 	`
 
 	_, err := db.Exec(query)

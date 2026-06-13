@@ -33,6 +33,11 @@ func RegisterRoutes() http.Handler {
 	jobServices := services.NewJobServices(jobRepository)
 	jobHandler := handlers.NewJobHandler(jobServices)
 
+	optimizationRepository := repositories.NewOptimizationRepository(db)
+	geminiClient := services.NewGeminiClient()
+	optimizationServices := services.NewOptimizationServices(optimizationRepository, resumeRepository, jobRepository, geminiClient)
+	optimizationHandler := handlers.NewOptimizationHandler(optimizationServices)
+
 	mux.HandleFunc("POST /v1/auth/login", authHandler.Login)
 
 	mux.Handle(
@@ -108,6 +113,25 @@ func RegisterRoutes() http.Handler {
 		"DELETE /v1/jobs/{id}",
 		authMiddleware.Middleware(
 			http.HandlerFunc(jobHandler.Delete),
+		),
+	)
+
+	mux.Handle(
+		"POST /v1/resumes/{resumeID}/optimize",
+		authMiddleware.Middleware(
+			http.HandlerFunc(optimizationHandler.Optimize),
+		),
+	)
+	mux.Handle(
+		"GET /v1/resumes/{resumeID}/optimizations",
+		authMiddleware.Middleware(
+			http.HandlerFunc(optimizationHandler.ListByResume),
+		),
+	)
+	mux.Handle(
+		"GET /v1/resumes/{resumeID}/optimizations/{optimizationID}",
+		authMiddleware.Middleware(
+			http.HandlerFunc(optimizationHandler.GetByID),
 		),
 	)
 

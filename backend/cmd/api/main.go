@@ -4,9 +4,15 @@ import (
 	"backend/internal/apresentation/routes"
 	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("Arquivo .env não encontrado, usando variáveis de ambiente do sistema")
+	}
+
 	router := routes.RegisterRoutes()
 
 	log.Println("Servidor iniciado na porta 8080")
