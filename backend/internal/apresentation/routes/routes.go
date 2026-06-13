@@ -29,6 +29,10 @@ func RegisterRoutes() http.Handler {
 	resumeServices := services.NewResumeServices(resumeRepository, textExtractor)
 	resumeHandler := handlers.NewResumeHandler(resumeServices)
 
+	jobRepository := repositories.NewJobRepository(db)
+	jobServices := services.NewJobServices(jobRepository)
+	jobHandler := handlers.NewJobHandler(jobServices)
+
 	mux.HandleFunc("POST /v1/auth/login", authHandler.Login)
 
 	mux.Handle(
@@ -73,6 +77,37 @@ func RegisterRoutes() http.Handler {
 		"DELETE /v1/resumes/{id}",
 		authMiddleware.Middleware(
 			http.HandlerFunc(resumeHandler.Delete),
+		),
+	)
+
+	mux.Handle(
+		"POST /v1/jobs",
+		authMiddleware.Middleware(
+			http.HandlerFunc(jobHandler.Create),
+		),
+	)
+	mux.Handle(
+		"GET /v1/jobs",
+		authMiddleware.Middleware(
+			http.HandlerFunc(jobHandler.List),
+		),
+	)
+	mux.Handle(
+		"GET /v1/jobs/{id}",
+		authMiddleware.Middleware(
+			http.HandlerFunc(jobHandler.GetByID),
+		),
+	)
+	mux.Handle(
+		"PUT /v1/jobs/{id}",
+		authMiddleware.Middleware(
+			http.HandlerFunc(jobHandler.Update),
+		),
+	)
+	mux.Handle(
+		"DELETE /v1/jobs/{id}",
+		authMiddleware.Middleware(
+			http.HandlerFunc(jobHandler.Delete),
 		),
 	)
 
