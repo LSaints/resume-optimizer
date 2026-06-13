@@ -54,6 +54,10 @@ func RegisterRoutes() http.Handler {
 	optimizationServices := services.NewOptimizationServices(optimizationRepository, resumeRepository, jobRepository, geminiClient)
 	optimizationHandler := handlers.NewOptimizationHandler(optimizationServices)
 
+	atsEvaluationRepository := repositories.NewAtsEvaluationRepository(db)
+	atsScoringServices := services.NewAtsScoringServices(atsEvaluationRepository, resumeRepository, jobRepository, geminiClient)
+	atsScoringHandler := handlers.NewAtsScoringHandler(atsScoringServices)
+
 	typstRenderService := services.NewTypstRenderService()
 	renderHandler := handlers.NewRenderHandler(optimizationServices, typstRenderService)
 
@@ -167,6 +171,25 @@ func RegisterRoutes() http.Handler {
 		),
 	)
 	mux.HandleFunc("GET /v1/optimizations/{optimizationID}/render/pdf", renderHandler.RenderPDF)
+
+	mux.Handle(
+		"POST /v1/resumes/{resumeID}/evaluate",
+		authMiddleware.Middleware(
+			http.HandlerFunc(atsScoringHandler.Evaluate),
+		),
+	)
+	mux.Handle(
+		"GET /v1/resumes/{resumeID}/evaluations",
+		authMiddleware.Middleware(
+			http.HandlerFunc(atsScoringHandler.ListByResume),
+		),
+	)
+	mux.Handle(
+		"GET /v1/resumes/{resumeID}/evaluations/{evaluationID}",
+		authMiddleware.Middleware(
+			http.HandlerFunc(atsScoringHandler.GetByID),
+		),
+	)
 
 	return c.Handler(mux)
 }

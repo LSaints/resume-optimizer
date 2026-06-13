@@ -62,6 +62,19 @@ func createTables(db *sql.DB) {
 		FOREIGN KEY (resume_id) REFERENCES resumes(id),
 		FOREIGN KEY (job_id) REFERENCES jobs(id)
 	);
+
+	CREATE TABLE IF NOT EXISTS ats_evaluations (
+		id TEXT PRIMARY KEY,
+		resume_id TEXT NOT NULL,
+		job_id TEXT NOT NULL,
+		score REAL NOT NULL,
+		summary TEXT NOT NULL,
+		details TEXT NOT NULL,
+		raw_response TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (resume_id) REFERENCES resumes(id),
+		FOREIGN KEY (job_id) REFERENCES jobs(id)
+	);
 	`
 
 	_, err := db.Exec(query)

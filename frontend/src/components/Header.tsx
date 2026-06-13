@@ -8,6 +8,7 @@ const navItems = [
   { to: '/resumes', label: 'Currículos' },
   { to: '/jobs', label: 'Vagas' },
   { to: '/optimize', label: 'Otimizar' },
+  { to: '/evaluate', label: 'Avaliar' },
 ]
 
 function Header() {

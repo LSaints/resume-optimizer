@@ -11,6 +11,9 @@ import JobFormPage from './pages/JobFormPage'
 import OptimizePage from './pages/OptimizePage'
 import TypstViewerPage from './pages/TypstViewerPage'
 import OptimizationHistoryPage from './pages/OptimizationHistoryPage'
+import EvaluatePage from './pages/EvaluatePage'
+import EvaluationResultPage from './pages/EvaluationResultPage'
+import EvaluationHistoryPage from './pages/EvaluationHistoryPage'
 
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -33,6 +36,9 @@ function App() {
             <Route path="/optimize" element={<OptimizePage />} />
             <Route path="/optimizations/:resumeId/:optimizationId" element={<TypstViewerPage />} />
             <Route path="/resumes/:id/optimizations" element={<OptimizationHistoryPage />} />
+            <Route path="/evaluate" element={<EvaluatePage />} />
+            <Route path="/evaluations/:resumeId/:evaluationId" element={<EvaluationResultPage />} />
+            <Route path="/resumes/:id/evaluations" element={<EvaluationHistoryPage />} />
           </Route>
         </Route>
       </Routes>
