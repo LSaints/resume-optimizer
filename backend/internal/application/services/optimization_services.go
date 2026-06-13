@@ -26,6 +26,8 @@ Regras:
 6. Mantenha a veracidade das informações — nunca invente experiências ou habilidades
 7. Priorize realizações mensuráveis e resultados concretos
 8. Otimize o formato para ser legível tanto por humanos quanto por sistemas ATS
+9. Escape corretamente caracteres especiais do Typst no texto corrido: use \* para asteriscos literais, \. para pontos literais, \( e \) para parênteses, \@ para arrobas em emails. Use - para itens de lista em vez de * ou •.
+10. Use APENAS sintaxe basica e segura do Typst: paragrafos simples, cabecalhos com =, listas com -, negrito com *texto*, italico com *texto*. Evite usar # antes de comandos — prefira a sintaxe de marcacao nativa do Typst. Nao use arrays com (), concatenacao com +, nem #function[arg] — isso causa erros. Escreva o curriculo como texto estruturado com secoes, paragrafos e listas simples.
 
 Retorne APENAS o código Typst, sem explicações adicionais.`
 
@@ -134,6 +136,18 @@ func (s *OptimizationServices) GetByResumeID(userID, resumeID string) ([]respons
 	return result, nil
 }
 
+func (s *OptimizationServices) GetByIDPublic(optimizationID string) (responses.OptimizeResponse, error) {
+	opt, err := s.OptRepo.GetByID(optimizationID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return responses.OptimizeResponse{}, errors.New("otimização não encontrada")
+		}
+		return responses.OptimizeResponse{}, err
+	}
+
+	return s.toResponse(opt), nil
+}
+
 func (s *OptimizationServices) GetByID(userID, optimizationID string) (responses.OptimizeResponse, error) {
 	opt, err := s.OptRepo.GetByID(optimizationID)
 	if err != nil {
@@ -153,6 +167,27 @@ func (s *OptimizationServices) GetByID(userID, optimizationID string) (responses
 	}
 
 	return s.toResponse(opt), nil
+}
+
+func (s *OptimizationServices) Delete(userID, optimizationID string) error {
+	opt, err := s.OptRepo.GetByID(optimizationID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("otimização não encontrada")
+		}
+		return err
+	}
+
+	resume, err := s.ResumeRepo.GetByID(opt.ResumeID.String())
+	if err != nil {
+		return errors.New("otimização não encontrada")
+	}
+
+	if resume.UserID.String() != userID {
+		return errors.New("otimização não encontrada")
+	}
+
+	return s.OptRepo.Delete(optimizationID)
 }
 
 func (s *OptimizationServices) toResponse(opt entities.ResumeOptimized) responses.OptimizeResponse {

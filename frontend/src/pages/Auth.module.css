@@ -1,0 +1,71 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-md);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--space-xxl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--space-xs);
+}
+
+.brandAccent {
+  color: var(--color-primary);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  margin-bottom: var(--space-xl);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.error {
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(212, 59, 74, 0.1);
+  border: 1px solid rgba(212, 59, 74, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.submit {
+  margin-top: var(--space-sm);
+}
+
+.footer {
+  text-align: center;
+  margin-top: var(--space-lg);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.footer a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.footer a:hover {
+  color: var(--color-primary-hover);
+}

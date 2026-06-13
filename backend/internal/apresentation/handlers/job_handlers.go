@@ -20,7 +20,11 @@ func NewJobHandler(service *services.JobServices) *JobHandler {
 func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 
 	var req requests.CreateJobRequest
 
@@ -46,7 +50,11 @@ func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *JobHandler) List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 
 	jobs, err := h.Service.GetByUserID(userID)
 	if err != nil {
@@ -61,7 +69,11 @@ func (h *JobHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *JobHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 
 	job, err := h.Service.GetByID(userID, id)
@@ -81,7 +93,11 @@ func (h *JobHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 func (h *JobHandler) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 
 	var req requests.UpdateJobRequest
@@ -111,7 +127,11 @@ func (h *JobHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (h *JobHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 
 	err := h.Service.Delete(userID, id)

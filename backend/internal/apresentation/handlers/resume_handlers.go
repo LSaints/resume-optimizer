@@ -24,7 +24,11 @@ func NewResumeHandler(service *services.ResumeServices) *ResumeHandler {
 func (h *ResumeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 
 	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
 
@@ -60,7 +64,11 @@ func (h *ResumeHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 
 	resumes, err := h.Service.GetByUserID(userID)
 	if err != nil {
@@ -75,7 +83,11 @@ func (h *ResumeHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 
 	resume, err := h.Service.GetByID(userID, id)
@@ -95,7 +107,11 @@ func (h *ResumeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 
 	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
@@ -136,7 +152,11 @@ func (h *ResumeHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 
 	err := h.Service.Delete(userID, id)

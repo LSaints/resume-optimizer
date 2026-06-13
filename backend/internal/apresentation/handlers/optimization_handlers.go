@@ -20,7 +20,11 @@ func NewOptimizationHandler(service *services.OptimizationServices) *Optimizatio
 func (h *OptimizationHandler) Optimize(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	resumeID := r.PathValue("resumeID")
 
 	var req requests.OptimizeResumeRequest
@@ -58,7 +62,11 @@ func (h *OptimizationHandler) Optimize(w http.ResponseWriter, r *http.Request) {
 func (h *OptimizationHandler) ListByResume(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	resumeID := r.PathValue("resumeID")
 
 	results, err := h.Service.GetByResumeID(userID, resumeID)
@@ -75,10 +83,38 @@ func (h *OptimizationHandler) ListByResume(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(results)
 }
 
+func (h *OptimizationHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
+	optimizationID := r.PathValue("optimizationID")
+
+	err := h.Service.Delete(userID, optimizationID)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if err.Error() == "otimização não encontrada" {
+			status = http.StatusNotFound
+		}
+		http.Error(w, err.Error(), status)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "otimização excluída"})
+}
+
 func (h *OptimizationHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID := r.Context().Value(middleware.UserIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "não autorizado", http.StatusUnauthorized)
+		return
+	}
 	optimizationID := r.PathValue("optimizationID")
 
 	result, err := h.Service.GetByID(userID, optimizationID)

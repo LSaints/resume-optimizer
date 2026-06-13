@@ -2,18 +2,34 @@ package routes
 
 import (
 	"net/http"
+	"os"
 
 	"backend/internal/application/services"
 	"backend/internal/apresentation/handlers"
 	"backend/internal/apresentation/middleware"
 	"backend/internal/infrastructure/data"
 	"backend/internal/infrastructure/repositories"
+
+	"github.com/rs/cors"
 )
 
 func RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	db := data.NewConnection()
+
+	frontendUrl := os.Getenv("FRONTEND_URL")
+	if frontendUrl == "" {
+		frontendUrl = "http://localhost:5173"
+	}
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{frontendUrl},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+		Debug:            true,
+	})
 
 	userRepository := repositories.NewUserRepository(db)
 	userServices := services.NewUserServices(userRepository)
@@ -37,6 +53,9 @@ func RegisterRoutes() http.Handler {
 	geminiClient := services.NewGeminiClient()
 	optimizationServices := services.NewOptimizationServices(optimizationRepository, resumeRepository, jobRepository, geminiClient)
 	optimizationHandler := handlers.NewOptimizationHandler(optimizationServices)
+
+	typstRenderService := services.NewTypstRenderService()
+	renderHandler := handlers.NewRenderHandler(optimizationServices, typstRenderService)
 
 	mux.HandleFunc("POST /v1/auth/login", authHandler.Login)
 
@@ -134,6 +153,20 @@ func RegisterRoutes() http.Handler {
 			http.HandlerFunc(optimizationHandler.GetByID),
 		),
 	)
+	mux.Handle(
+		"DELETE /v1/resumes/{resumeID}/optimizations/{optimizationID}",
+		authMiddleware.Middleware(
+			http.HandlerFunc(optimizationHandler.Delete),
+		),
+	)
 
-	return mux
+	mux.Handle(
+		"GET /v1/optimizations/{optimizationID}/render",
+		authMiddleware.Middleware(
+			http.HandlerFunc(renderHandler.RenderSVG),
+		),
+	)
+	mux.HandleFunc("GET /v1/optimizations/{optimizationID}/render/pdf", renderHandler.RenderPDF)
+
+	return c.Handler(mux)
 }

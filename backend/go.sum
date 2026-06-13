@@ -10,5 +10,7 @@ github.com/mattn/go-sqlite3 v1.14.45 h1:6KA/spDguL3KV8rnybG7ezSaE4SeMR3KC9VbUoAQ
 github.com/mattn/go-sqlite3 v1.14.45/go.mod h1:pjEuOr8IwzLJP2MfGeTb0A35jauH+C2kbHKBr7yXKVQ=
 github.com/nguyenthenguyen/docx v0.0.0-20230621112118-9c8e795a11db h1:v0cW/tTMrJQyZr7r6t+t9+NhH2OBAjydHisVYxuyObc=
 github.com/nguyenthenguyen/docx v0.0.0-20230621112118-9c8e795a11db/go.mod h1:BZyH8oba3hE/BTt2FfBDGPOHhXiKs9RFmUvvXRdzrhM=
+github.com/rs/cors v1.11.1 h1:eU3gRzXLRK57F5rKMGMZURNdIG4EoAmX8k94r9wXWHA=
+github.com/rs/cors v1.11.1/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
 golang.org/x/crypto v0.53.0 h1:QZ4Muo8THX6CizN2vPPd5fBGHyogrdK9fG4wLPFUsto=
 golang.org/x/crypto v0.53.0/go.mod h1:DNLU434OwVakk9PzuwV8w62mAJpRJL3vsgcfp4Qnsio=

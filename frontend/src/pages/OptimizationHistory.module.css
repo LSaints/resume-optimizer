@@ -1,0 +1,217 @@
+.page {
+  animation: fadeIn var(--transition-base) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: var(--space-xs);
+  transition: color var(--transition-fast);
+  line-height: 1;
+}
+
+.backButton:hover {
+  color: var(--color-text);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.thumb {
+  width: 80px;
+  height: 100px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-hover);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbSvg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbSvg svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.thumbFallback {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resumeName {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.jobTitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.date {
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary, var(--color-text-secondary));
+}
+
+.deleteBtn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-danger, #dc2626);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.deleteBtn:hover {
+  color: var(--color-danger, #b91c1c);
+  border-color: var(--color-danger, #dc2626);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl) 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+}
+
+.error {
+  color: var(--color-danger, #dc2626);
+  font-size: 0.9375rem;
+  margin-bottom: var(--space-lg);
+}
+
+/* Skeleton */
+.skeletonCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.skeletonThumb {
+  width: 80px;
+  height: 100px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-hover);
+  animation: shimmer 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.skeletonInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.skeletonLine {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--color-surface-hover);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeletonLineLong {
+  width: 60%;
+}
+
+.skeletonLineShort {
+  width: 30%;
+}
+
+@keyframes shimmer {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 767px) {
+  .card {
+    flex-wrap: wrap;
+  }
+
+  .thumb {
+    width: 60px;
+    height: 80px;
+  }
+}

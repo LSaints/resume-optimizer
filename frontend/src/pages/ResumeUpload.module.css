@@ -1,0 +1,68 @@
+.page {
+  animation: fadeIn var(--transition-base) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: var(--space-xs);
+  transition: color var(--transition-fast);
+  line-height: 1;
+}
+
+.backButton:hover {
+  color: var(--color-text);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.form {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-xxl);
+  text-align: center;
+}
+
+.successIcon {
+  font-size: 3rem;
+}
+
+.successText {
+  color: var(--color-success);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}

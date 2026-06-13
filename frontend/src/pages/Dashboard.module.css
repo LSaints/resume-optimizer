@@ -1,0 +1,140 @@
+.page {
+  animation: fadeIn var(--transition-base) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.greeting {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: var(--space-xxl);
+}
+
+.greetingName {
+  color: var(--color-primary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.card:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.cardCount {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.cardLabel {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.cardArrow {
+  align-self: flex-end;
+  color: var(--color-primary);
+  font-size: 1.25rem;
+  transition: transform var(--transition-fast);
+}
+
+.card:hover .cardArrow {
+  transform: translateX(4px);
+}
+
+/* Skeleton */
+.skeleton {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+.skeletonCard {
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.skeletonLine {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--color-surface-hover);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeletonLineShort {
+  width: 40%;
+}
+
+.skeletonLineMedium {
+  width: 65%;
+}
+
+.skeletonCount {
+  height: 40px;
+  width: 50%;
+  border-radius: 6px;
+  background: var(--color-surface-hover);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 767px) {
+  .grid,
+  .skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .greeting {
+    font-size: 1.375rem;
+    margin-bottom: var(--space-xl);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid,
+  .skeleton {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
