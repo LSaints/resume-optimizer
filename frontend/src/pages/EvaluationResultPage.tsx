@@ -69,6 +69,30 @@ function EvaluationResultPage() {
     return styles.scoreLow
   }
 
+  function barClass(pct: number): string {
+    if (pct >= 0.7) return styles.barHigh
+    if (pct >= 0.4) return styles.barMedium
+    return styles.barLow
+  }
+
+  function hasBreakdown(): boolean {
+    return (
+      evaluation!.breakdownKeywordMatch > 0 ||
+      evaluation!.breakdownTechnical > 0 ||
+      evaluation!.breakdownExperience > 0 ||
+      evaluation!.breakdownImpact > 0 ||
+      evaluation!.breakdownReadability > 0
+    )
+  }
+
+  const breakdownItems = [
+    { key: 'breakdownKeywordMatch' as const, label: 'Correspondência de Palavras-chave', weight: '30%', max: 3.0 },
+    { key: 'breakdownTechnical' as const, label: 'Compatibilidade Técnica', weight: '25%', max: 2.5 },
+    { key: 'breakdownExperience' as const, label: 'Experiência Profissional', weight: '20%', max: 2.0 },
+    { key: 'breakdownImpact' as const, label: 'Impacto e Resultados', weight: '15%', max: 1.5 },
+    { key: 'breakdownReadability' as const, label: 'Legibilidade ATS', weight: '10%', max: 1.0 },
+  ]
+
   if (loading) {
     return (
       <div className={styles.page}>
@@ -118,6 +142,35 @@ function EvaluationResultPage() {
         <p className={styles.summary}>{evaluation.summary}</p>
       </div>
 
+      {hasBreakdown() && (
+        <div className={styles.breakdown}>
+          <h2 className={styles.breakdownTitle}>Pontuação por Critério</h2>
+          <div className={styles.breakdownList}>
+            {breakdownItems.map((item) => {
+              const value = evaluation[item.key]
+              const pct = item.max > 0 ? value / item.max : 0
+              return (
+                <div key={item.key} className={styles.breakdownItem}>
+                  <div className={styles.breakdownHeader}>
+                    <span className={styles.breakdownLabel}>{item.label}</span>
+                    <span className={styles.breakdownWeight}>{item.weight}</span>
+                  </div>
+                  <div className={styles.breakdownBarTrack}>
+                    <div
+                      className={`${styles.breakdownBarFill} ${barClass(pct)}`}
+                      style={{ width: `${Math.min(pct * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span className={styles.breakdownScore}>
+                    {value.toFixed(1)} / {item.max.toFixed(1)}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div className={styles.meta}>
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>Currículo</span>
@@ -141,6 +194,48 @@ function EvaluationResultPage() {
           Ver histórico
         </Button>
       </div>
+
+      {(evaluation.matchedKeywords.length > 0 || evaluation.missingKeywords.length > 0) && (
+        <div className={styles.keywords}>
+          {evaluation.matchedKeywords.length > 0 && (
+            <div className={styles.keywordSection}>
+              <h2 className={styles.keywordSectionTitle}>Palavras-chave Encontradas</h2>
+              <div className={styles.keywordTags}>
+                {evaluation.matchedKeywords.map((kw) => (
+                  <span key={kw} className={`${styles.keywordTag} ${styles.keywordTagMatch}`}>
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {evaluation.missingKeywords.length > 0 && (
+            <div className={styles.keywordSection}>
+              <h2 className={styles.keywordSectionTitle}>Palavras-chave Ausentes</h2>
+              <div className={styles.keywordTags}>
+                {evaluation.missingKeywords.map((kw) => (
+                  <span key={kw} className={`${styles.keywordTag} ${styles.keywordTagMissing}`}>
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {evaluation.recommendations.length > 0 && (
+        <div className={styles.recommendations}>
+          <h2 className={styles.recommendationsTitle}>Recomendações</h2>
+          <ol className={styles.recommendationsList}>
+            {evaluation.recommendations.map((rec, i) => (
+              <li key={i} className={styles.recommendationItem}>
+                {rec}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       {evaluation.details && (
         <div className={styles.details}>

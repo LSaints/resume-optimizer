@@ -71,6 +71,14 @@ func createTables(db *sql.DB) {
 		summary TEXT NOT NULL,
 		details TEXT NOT NULL,
 		raw_response TEXT NOT NULL,
+		breakdown_keyword_match REAL DEFAULT 0,
+		breakdown_technical REAL DEFAULT 0,
+		breakdown_experience REAL DEFAULT 0,
+		breakdown_impact REAL DEFAULT 0,
+		breakdown_readability REAL DEFAULT 0,
+		matched_keywords TEXT DEFAULT '[]',
+		missing_keywords TEXT DEFAULT '[]',
+		recommendations TEXT DEFAULT '[]',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (resume_id) REFERENCES resumes(id),
 		FOREIGN KEY (job_id) REFERENCES jobs(id)
@@ -80,5 +88,23 @@ func createTables(db *sql.DB) {
 	_, err := db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	migrateAtsEvaluations(db)
+}
+
+func migrateAtsEvaluations(db *sql.DB) {
+	migrations := []string{
+		"ALTER TABLE ats_evaluations ADD COLUMN breakdown_keyword_match REAL DEFAULT 0",
+		"ALTER TABLE ats_evaluations ADD COLUMN breakdown_technical REAL DEFAULT 0",
+		"ALTER TABLE ats_evaluations ADD COLUMN breakdown_experience REAL DEFAULT 0",
+		"ALTER TABLE ats_evaluations ADD COLUMN breakdown_impact REAL DEFAULT 0",
+		"ALTER TABLE ats_evaluations ADD COLUMN breakdown_readability REAL DEFAULT 0",
+		"ALTER TABLE ats_evaluations ADD COLUMN matched_keywords TEXT DEFAULT '[]'",
+		"ALTER TABLE ats_evaluations ADD COLUMN missing_keywords TEXT DEFAULT '[]'",
+		"ALTER TABLE ats_evaluations ADD COLUMN recommendations TEXT DEFAULT '[]'",
+	}
+	for _, m := range migrations {
+		db.Exec(m)
 	}
 }

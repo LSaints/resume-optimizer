@@ -17,8 +17,8 @@ func NewAtsEvaluationRepository(db *sql.DB) *AtsEvaluationRepository {
 
 func (r *AtsEvaluationRepository) Create(eval entities.AtsEvaluation) error {
 	query := `
-		INSERT INTO ats_evaluations (id, resume_id, job_id, score, summary, details, raw_response, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO ats_evaluations (id, resume_id, job_id, score, summary, details, raw_response, breakdown_keyword_match, breakdown_technical, breakdown_experience, breakdown_impact, breakdown_readability, matched_keywords, missing_keywords, recommendations, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err := r.db.Exec(
@@ -30,6 +30,14 @@ func (r *AtsEvaluationRepository) Create(eval entities.AtsEvaluation) error {
 		eval.Summary,
 		eval.Details,
 		eval.RawResponse,
+		eval.BreakdownKeywordMatch,
+		eval.BreakdownTechnical,
+		eval.BreakdownExperience,
+		eval.BreakdownImpact,
+		eval.BreakdownReadability,
+		eval.MatchedKeywords,
+		eval.MissingKeywords,
+		eval.Recommendations,
 		eval.CreatedAt,
 	)
 
@@ -38,7 +46,7 @@ func (r *AtsEvaluationRepository) Create(eval entities.AtsEvaluation) error {
 
 func (r *AtsEvaluationRepository) GetByID(id string) (entities.AtsEvaluation, error) {
 	query := `
-		SELECT id, resume_id, job_id, score, summary, details, raw_response, created_at
+		SELECT id, resume_id, job_id, score, summary, details, raw_response, breakdown_keyword_match, breakdown_technical, breakdown_experience, breakdown_impact, breakdown_readability, matched_keywords, missing_keywords, recommendations, created_at
 		FROM ats_evaluations
 		WHERE id = ?
 	`
@@ -53,6 +61,14 @@ func (r *AtsEvaluationRepository) GetByID(id string) (entities.AtsEvaluation, er
 		&eval.Summary,
 		&eval.Details,
 		&eval.RawResponse,
+		&eval.BreakdownKeywordMatch,
+		&eval.BreakdownTechnical,
+		&eval.BreakdownExperience,
+		&eval.BreakdownImpact,
+		&eval.BreakdownReadability,
+		&eval.MatchedKeywords,
+		&eval.MissingKeywords,
+		&eval.Recommendations,
 		&eval.CreatedAt,
 	)
 
@@ -65,7 +81,7 @@ func (r *AtsEvaluationRepository) GetByID(id string) (entities.AtsEvaluation, er
 
 func (r *AtsEvaluationRepository) GetByResumeID(resumeID string) ([]entities.AtsEvaluation, error) {
 	query := `
-		SELECT id, resume_id, job_id, score, summary, details, raw_response, created_at
+		SELECT id, resume_id, job_id, score, summary, details, raw_response, breakdown_keyword_match, breakdown_technical, breakdown_experience, breakdown_impact, breakdown_readability, matched_keywords, missing_keywords, recommendations, created_at
 		FROM ats_evaluations
 		WHERE resume_id = ?
 		ORDER BY created_at DESC
@@ -90,6 +106,14 @@ func (r *AtsEvaluationRepository) GetByResumeID(resumeID string) ([]entities.Ats
 			&eval.Summary,
 			&eval.Details,
 			&eval.RawResponse,
+			&eval.BreakdownKeywordMatch,
+			&eval.BreakdownTechnical,
+			&eval.BreakdownExperience,
+			&eval.BreakdownImpact,
+			&eval.BreakdownReadability,
+			&eval.MatchedKeywords,
+			&eval.MissingKeywords,
+			&eval.Recommendations,
 			&eval.CreatedAt,
 		)
 

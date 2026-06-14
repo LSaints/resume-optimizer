@@ -67,6 +67,14 @@ func setupAtsTestDB(t *testing.T) *sql.DB {
 			summary TEXT NOT NULL,
 			details TEXT NOT NULL,
 			raw_response TEXT NOT NULL,
+			breakdown_keyword_match REAL DEFAULT 0,
+			breakdown_technical REAL DEFAULT 0,
+			breakdown_experience REAL DEFAULT 0,
+			breakdown_impact REAL DEFAULT 0,
+			breakdown_readability REAL DEFAULT 0,
+			matched_keywords TEXT DEFAULT '[]',
+			missing_keywords TEXT DEFAULT '[]',
+			recommendations TEXT DEFAULT '[]',
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (resume_id) REFERENCES resumes(id),
 			FOREIGN KEY (job_id) REFERENCES jobs(id)
@@ -253,6 +261,30 @@ func insertDirectEvaluation(t *testing.T, db *sql.DB, resumeID, jobID string) st
 		`INSERT INTO ats_evaluations (id, resume_id, job_id, score, summary, details, raw_response, created_at)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		id, resumeID, jobID, 7.5, "Resumo da avaliação", "Detalhamento completo", `{"score":7.5}`,
+		time.Now(),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return id
+}
+
+func insertDirectEvaluationComBreakdown(t *testing.T, db *sql.DB, resumeID, jobID string) string {
+	t.Helper()
+
+	id := uuid.New().String()
+	_, err := db.Exec(
+		`INSERT INTO ats_evaluations
+		 (id, resume_id, job_id, score, summary, details, raw_response,
+		  breakdown_keyword_match, breakdown_technical, breakdown_experience,
+		  breakdown_impact, breakdown_readability,
+		  matched_keywords, missing_keywords, recommendations, created_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, resumeID, jobID,
+		8.3, "Resumo da avaliação", "Detalhamento completo", `{"score":8.3}`,
+		2.6, 2.1, 1.6, 1.2, 0.8,
+		`["Go","SQL"]`, `["Python"]`, `["Adicione experiência em Python"]`,
 		time.Now(),
 	)
 	if err != nil {
@@ -646,5 +678,161 @@ func TestAtsEvaluation_Visualizar_SemToken_Retorna401(t *testing.T) {
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("esperado 401, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+// --- Enriched Evaluation ---
+
+func TestAtsEvaluation_Visualizar_ComBreakdown_Retorna200(t *testing.T) {
+	fixture := setupAtsTestFixture(t)
+	user := insertAtsUser(t, fixture.userRepository, "breakdown@teste.com", "senha123")
+	token := atsAuthToken(t, fixture, "breakdown@teste.com", "senha123")
+
+	resumeID := insertDirectResume(t, fixture.db, user.ID, "Conteudo")
+	jobID := insertDirectJob(t, fixture.db, user.ID, "Vaga", "Descricao")
+	evalID := insertDirectEvaluationComBreakdown(t, fixture.db, resumeID, jobID)
+
+	req := httptest.NewRequest("GET", "/v1/resumes/"+resumeID+"/evaluations/"+evalID, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	fixture.router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("esperado 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+
+	var resp responses.AtsEvaluationResponse
+	err := json.NewDecoder(rec.Body).Decode(&resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.ID != evalID {
+		t.Fatalf("ID incorreto: esperado %s, got %s", evalID, resp.ID)
+	}
+
+	if resp.BreakdownKeywordMatch != 2.6 {
+		t.Fatalf("BreakdownKeywordMatch: esperado 2.6, got %.1f", resp.BreakdownKeywordMatch)
+	}
+	if resp.BreakdownTechnical != 2.1 {
+		t.Fatalf("BreakdownTechnical: esperado 2.1, got %.1f", resp.BreakdownTechnical)
+	}
+	if resp.BreakdownExperience != 1.6 {
+		t.Fatalf("BreakdownExperience: esperado 1.6, got %.1f", resp.BreakdownExperience)
+	}
+	if resp.BreakdownImpact != 1.2 {
+		t.Fatalf("BreakdownImpact: esperado 1.2, got %.1f", resp.BreakdownImpact)
+	}
+	if resp.BreakdownReadability != 0.8 {
+		t.Fatalf("BreakdownReadability: esperado 0.8, got %.1f", resp.BreakdownReadability)
+	}
+
+	if len(resp.MatchedKeywords) != 2 || resp.MatchedKeywords[0] != "Go" {
+		t.Fatalf("matchedKeywords incorreto: %v", resp.MatchedKeywords)
+	}
+	if len(resp.MissingKeywords) != 1 || resp.MissingKeywords[0] != "Python" {
+		t.Fatalf("missingKeywords incorreto: %v", resp.MissingKeywords)
+	}
+	if len(resp.Recommendations) != 1 || resp.Recommendations[0] != "Adicione experiência em Python" {
+		t.Fatalf("recommendations incorreto: %v", resp.Recommendations)
+	}
+
+	soma := resp.BreakdownKeywordMatch + resp.BreakdownTechnical + resp.BreakdownExperience + resp.BreakdownImpact + resp.BreakdownReadability
+	if soma-resp.Score > 0.1 || resp.Score-soma > 0.1 {
+		t.Fatalf("soma dos breakdowns (%.1f) difere do score (%.1f)", soma, resp.Score)
+	}
+}
+
+func TestAtsEvaluation_Visualizar_AvaliacaoAntiga_SemBreakdown_Retorna200(t *testing.T) {
+	fixture := setupAtsTestFixture(t)
+	user := insertAtsUser(t, fixture.userRepository, "antiga@teste.com", "senha123")
+	token := atsAuthToken(t, fixture, "antiga@teste.com", "senha123")
+
+	resumeID := insertDirectResume(t, fixture.db, user.ID, "Conteudo")
+	jobID := insertDirectJob(t, fixture.db, user.ID, "Vaga", "Descricao")
+	evalID := insertDirectEvaluation(t, fixture.db, resumeID, jobID)
+
+	req := httptest.NewRequest("GET", "/v1/resumes/"+resumeID+"/evaluations/"+evalID, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	fixture.router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("esperado 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+
+	var resp responses.AtsEvaluationResponse
+	err := json.NewDecoder(rec.Body).Decode(&resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.ID != evalID {
+		t.Fatalf("ID incorreto: esperado %s, got %s", evalID, resp.ID)
+	}
+
+	if resp.BreakdownKeywordMatch != 0 {
+		t.Fatalf("BreakdownKeywordMatch: esperado 0, got %.1f", resp.BreakdownKeywordMatch)
+	}
+	if resp.BreakdownTechnical != 0 {
+		t.Fatalf("BreakdownTechnical: esperado 0, got %.1f", resp.BreakdownTechnical)
+	}
+	if resp.BreakdownExperience != 0 {
+		t.Fatalf("BreakdownExperience: esperado 0, got %.1f", resp.BreakdownExperience)
+	}
+	if resp.BreakdownImpact != 0 {
+		t.Fatalf("BreakdownImpact: esperado 0, got %.1f", resp.BreakdownImpact)
+	}
+	if resp.BreakdownReadability != 0 {
+		t.Fatalf("BreakdownReadability: esperado 0, got %.1f", resp.BreakdownReadability)
+	}
+
+	if len(resp.MatchedKeywords) != 0 {
+		t.Fatalf("matchedKeywords: esperado vazio, got %v", resp.MatchedKeywords)
+	}
+	if len(resp.MissingKeywords) != 0 {
+		t.Fatalf("missingKeywords: esperado vazio, got %v", resp.MissingKeywords)
+	}
+	if len(resp.Recommendations) != 0 {
+		t.Fatalf("recommendations: esperado vazio, got %v", resp.Recommendations)
+	}
+}
+
+func TestAtsEvaluation_Listar_NaoContemBreakdownNemListas(t *testing.T) {
+	fixture := setupAtsTestFixture(t)
+	user := insertAtsUser(t, fixture.userRepository, "listbreak@teste.com", "senha123")
+	token := atsAuthToken(t, fixture, "listbreak@teste.com", "senha123")
+
+	resumeID := insertDirectResume(t, fixture.db, user.ID, "Conteudo")
+	jobID := insertDirectJob(t, fixture.db, user.ID, "Vaga", "Descricao")
+	insertDirectEvaluationComBreakdown(t, fixture.db, resumeID, jobID)
+
+	req := httptest.NewRequest("GET", "/v1/resumes/"+resumeID+"/evaluations", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	fixture.router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("esperado 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+
+	var evals []responses.AtsEvaluationSummaryResponse
+	err := json.NewDecoder(rec.Body).Decode(&evals)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(evals) != 1 {
+		t.Fatalf("esperado 1 avaliação, got %d", len(evals))
+	}
+
+	jsonBytes, _ := json.Marshal(evals[0])
+	bodyStr := string(jsonBytes)
+
+	camposProibidos := []string{"breakdownKeywordMatch", "breakdownTechnical", "breakdownExperience", "breakdownImpact", "breakdownReadability", "matchedKeywords", "missingKeywords", "recommendations", "details"}
+	for _, campo := range camposProibidos {
+		if strings.Contains(bodyStr, campo) {
+			t.Fatalf("listagem não deve conter campo '%s': %s", campo, bodyStr)
+		}
 	}
 }

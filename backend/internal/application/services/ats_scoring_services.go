@@ -15,35 +15,203 @@ import (
 	"github.com/google/uuid"
 )
 
-const atsScoringSystemPrompt = `Você é um especialista em recrutamento e seleção com vasto conhecimento em ATS (Applicant Tracking Systems).
+const atsScoringSystemPrompt = `Você é um especialista sênior em recrutamento, seleção, ATS (Applicant Tracking Systems), aquisição de talentos e análise de currículos.
 
-Sua função é analisar a compatibilidade de um currículo com uma descrição de vaga e gerar uma avaliação objetiva.
+Sua função é avaliar objetivamente a compatibilidade entre um currículo e uma vaga de emprego.
 
-Analise os seguintes critérios:
-1. Correspondência de palavras-chave — presença de termos técnicos, ferramentas e habilidades mencionadas na vaga
-2. Adequação de experiência — anos de experiência, nível hierárquico, setor de atuação
-3. Compatibilidade de habilidades — hard skills e soft skills requeridas vs. apresentadas
-4. Estrutura e formatação — organização, clareza, seções bem definidas
-5. Resultados mensuráveis — presença de métricas, realizações quantificáveis
-6. Legibilidade para ATS — uso de formato limpo, sem tabelas ou gráficos
+Você deve agir como um sistema ATS moderno utilizado por plataformas como Gupy, Greenhouse, Lever, Workday, Ashby e similares.
 
-Retorne APENAS um JSON válido no seguinte formato, sem formatação markdown:
+# Objetivo
+
+Analise o currículo em relação à vaga e gere uma pontuação de compatibilidade ATS baseada em critérios mensuráveis.
+
+A avaliação deve considerar exclusivamente informações presentes no currículo e na vaga.
+
+Não invente experiências, habilidades ou requisitos.
+
+# Metodologia de Avaliação
+
+Calcule a nota final utilizando os pesos abaixo:
+
+## 1. Correspondência de Palavras-chave (30%)
+
+Avalie:
+
+* Tecnologias
+* Ferramentas
+* Frameworks
+* Linguagens
+* Metodologias
+* Certificações
+* Termos técnicos
+
+Pontuação máxima: 3.0
+
+## 2. Compatibilidade Técnica (25%)
+
+Avalie:
+
+* Hard skills exigidas
+* Conhecimentos técnicos desejados
+* Ferramentas utilizadas
+* Experiências relacionadas
+
+Pontuação máxima: 2.5
+
+## 3. Experiência Profissional (20%)
+
+Avalie:
+
+* Nível de senioridade
+* Tempo de experiência compatível
+* Histórico profissional
+* Complexidade das responsabilidades
+
+Pontuação máxima: 2.0
+
+## 4. Impacto e Resultados (15%)
+
+Avalie:
+
+* Métricas
+* Indicadores
+* Resultados mensuráveis
+* Conquistas profissionais
+
+Pontuação máxima: 1.5
+
+## 5. Estrutura e Legibilidade ATS (10%)
+
+Avalie:
+
+* Clareza
+* Organização
+* Seções bem definidas
+* Facilidade de leitura por ATS
+
+Pontuação máxima: 1.0
+
+# Interpretação da Nota
+
+0.0 – 2.9
+
+Compatibilidade muito baixa.
+O currículo possui pouca aderência aos requisitos da vaga.
+
+3.0 – 4.9
+
+Compatibilidade baixa.
+Existem lacunas significativas entre o currículo e a vaga.
+
+5.0 – 6.9
+
+Compatibilidade moderada.
+O candidato atende parte relevante dos requisitos.
+
+7.0 – 8.4
+
+Boa compatibilidade.
+O currículo demonstra forte alinhamento com a vaga.
+
+8.5 – 10.0
+
+Excelente compatibilidade.
+O currículo apresenta aderência muito alta aos requisitos.
+
+# Diretrizes para Análise
+
+Identifique:
+
+* Principais palavras-chave da vaga
+* Palavras-chave encontradas no currículo
+* Competências ausentes
+* Requisitos parcialmente atendidos
+* Requisitos totalmente atendidos
+* Possíveis melhorias para aumentar a compatibilidade ATS
+
+Seja específico.
+
+Evite comentários genéricos.
+
+Sempre explique os motivos da pontuação atribuída.
+
+# Regras
+
+* Não invente informações.
+* Não assuma conhecimentos não mencionados.
+* Não penalize o candidato por requisitos classificados como desejáveis quando não forem obrigatórios.
+* Considere sinônimos e tecnologias equivalentes quando apropriado.
+* Considere contexto profissional ao avaliar compatibilidade.
+* Utilize linguagem profissional em português brasileiro.
+
+# Formato de Saída
+
+Retorne APENAS um JSON válido.
+
+Não utilize markdown.
+
+Não utilize blocos de código.
+
+Não adicione comentários.
+
+O JSON deve seguir exatamente esta estrutura:
 
 {
-  "score": 7.5,
-  "summary": "Resumo da avaliação em português",
-  "details": "Detalhamento com pontos fortes e oportunidades de melhoria em português"
+"score": 8.3,
+"summary": "Resumo executivo da compatibilidade ATS.",
+"details": "Análise detalhada dos critérios avaliados, pontos fortes, lacunas identificadas e oportunidades de melhoria.",
+"breakdown": {
+"keywordMatch": 2.6,
+"technicalCompatibility": 2.1,
+"professionalExperience": 1.8,
+"impactAndResults": 1.2,
+"atsReadability": 0.8
+},
+"matchedKeywords": [
+"Palavra-chave 1",
+"Palavra-chave 2"
+],
+"missingKeywords": [
+"Palavra-chave ausente 1",
+"Palavra-chave ausente 2"
+],
+"recommendations": [
+"Recomendação 1",
+"Recomendação 2"
+]
 }
 
-A pontuação deve ser um número entre 0 e 10, com no máximo uma casa decimal.`
+# Validação Final
+
+Antes de responder, confirme:
+
+* O JSON é válido.
+* O score está entre 0.0 e 10.0.
+* O score possui no máximo uma casa decimal.
+* Os subtotais respeitam os pesos definidos.
+* Nenhuma informação foi inventada.
+* Nenhum texto foi retornado fora do JSON.
+`
+
+type atsBreakdown struct {
+	KeywordMatch           float64 `json:"keywordMatch"`
+	TechnicalCompatibility float64 `json:"technicalCompatibility"`
+	ProfessionalExperience float64 `json:"professionalExperience"`
+	ImpactAndResults       float64 `json:"impactAndResults"`
+	AtsReadability         float64 `json:"atsReadability"`
+}
 
 type atsScoreResponse struct {
-	Score   float64 `json:"score"`
-	Summary string  `json:"summary"`
-	Details string  `json:"details"`
+	Score           float64       `json:"score"`
+	Summary         string        `json:"summary"`
+	Details         string        `json:"details"`
+	Breakdown       atsBreakdown  `json:"breakdown"`
+	MatchedKeywords []string      `json:"matchedKeywords"`
+	MissingKeywords []string      `json:"missingKeywords"`
+	Recommendations []string      `json:"recommendations"`
 }
 
-func parseEvaluationResponse(raw string) (float64, string, string, error) {
+func parseEvaluationResponse(raw string) (*atsScoreResponse, error) {
 	raw = strings.TrimSpace(raw)
 
 	raw = strings.TrimPrefix(raw, "```json")
@@ -53,22 +221,38 @@ func parseEvaluationResponse(raw string) (float64, string, string, error) {
 
 	var resp atsScoreResponse
 	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
-		return 0, "", "", errors.New("resposta inválida da IA")
+		return nil, errors.New("resposta inválida da IA")
 	}
 
 	if resp.Score < 0 || resp.Score > 10 {
-		return 0, "", "", fmt.Errorf("pontuação inválida: %.1f", resp.Score)
+		return nil, fmt.Errorf("pontuação inválida: %.1f", resp.Score)
 	}
 
 	if resp.Summary == "" || resp.Details == "" {
-		return 0, "", "", errors.New("resposta inválida da IA")
+		return nil, errors.New("resposta inválida da IA")
 	}
 
-	return resp.Score, resp.Summary, resp.Details, nil
+	if resp.Breakdown.KeywordMatch < 0 || resp.Breakdown.KeywordMatch > 3.0 {
+		return nil, fmt.Errorf("breakdownKeywordMatch inválido: %.2f", resp.Breakdown.KeywordMatch)
+	}
+	if resp.Breakdown.TechnicalCompatibility < 0 || resp.Breakdown.TechnicalCompatibility > 2.5 {
+		return nil, fmt.Errorf("breakdownTechnical inválido: %.2f", resp.Breakdown.TechnicalCompatibility)
+	}
+	if resp.Breakdown.ProfessionalExperience < 0 || resp.Breakdown.ProfessionalExperience > 2.0 {
+		return nil, fmt.Errorf("breakdownExperience inválido: %.2f", resp.Breakdown.ProfessionalExperience)
+	}
+	if resp.Breakdown.ImpactAndResults < 0 || resp.Breakdown.ImpactAndResults > 1.5 {
+		return nil, fmt.Errorf("breakdownImpact inválido: %.2f", resp.Breakdown.ImpactAndResults)
+	}
+	if resp.Breakdown.AtsReadability < 0 || resp.Breakdown.AtsReadability > 1.0 {
+		return nil, fmt.Errorf("breakdownReadability inválido: %.2f", resp.Breakdown.AtsReadability)
+	}
+
+	return &resp, nil
 }
 
 type AtsScoringServices struct {
-	EvalRepo  *repositories.AtsEvaluationRepository
+	EvalRepo   *repositories.AtsEvaluationRepository
 	ResumeRepo *repositories.ResumeRepository
 	JobRepo    *repositories.JobRepository
 	Gemini     *GeminiClient
@@ -120,20 +304,32 @@ func (s *AtsScoringServices) Evaluate(userID, resumeID, jobID string) (responses
 		return responses.AtsEvaluationResponse{}, err
 	}
 
-	score, summary, details, err := parseEvaluationResponse(rawText)
+	parsed, err := parseEvaluationResponse(rawText)
 	if err != nil {
 		return responses.AtsEvaluationResponse{}, err
 	}
 
+	matchedKeywordsJSON, _ := json.Marshal(parsed.MatchedKeywords)
+	missingKeywordsJSON, _ := json.Marshal(parsed.MissingKeywords)
+	recommendationsJSON, _ := json.Marshal(parsed.Recommendations)
+
 	eval := entities.AtsEvaluation{
-		ID:          uuid.New(),
-		ResumeID:    resume.ID,
-		JobID:       job.ID,
-		Score:       score,
-		Summary:     summary,
-		Details:     details,
-		RawResponse: rawText,
-		CreatedAt:   time.Now(),
+		ID:                    uuid.New(),
+		ResumeID:              resume.ID,
+		JobID:                 job.ID,
+		Score:                 parsed.Score,
+		Summary:               parsed.Summary,
+		Details:               parsed.Details,
+		RawResponse:           rawText,
+		BreakdownKeywordMatch: parsed.Breakdown.KeywordMatch,
+		BreakdownTechnical:    parsed.Breakdown.TechnicalCompatibility,
+		BreakdownExperience:   parsed.Breakdown.ProfessionalExperience,
+		BreakdownImpact:       parsed.Breakdown.ImpactAndResults,
+		BreakdownReadability:  parsed.Breakdown.AtsReadability,
+		MatchedKeywords:       string(matchedKeywordsJSON),
+		MissingKeywords:       string(missingKeywordsJSON),
+		Recommendations:       string(recommendationsJSON),
+		CreatedAt:             time.Now(),
 	}
 
 	err = s.EvalRepo.Create(eval)
@@ -199,13 +395,39 @@ func (s *AtsScoringServices) GetByID(userID, evaluationID string) (responses.Ats
 }
 
 func (s *AtsScoringServices) toResponse(eval entities.AtsEvaluation) responses.AtsEvaluationResponse {
+	matchedKeywords := deserializeStringSlice(eval.MatchedKeywords)
+	missingKeywords := deserializeStringSlice(eval.MissingKeywords)
+	recommendations := deserializeStringSlice(eval.Recommendations)
+
 	return responses.AtsEvaluationResponse{
-		ID:        eval.ID.String(),
-		ResumeID:  eval.ResumeID.String(),
-		JobID:     eval.JobID.String(),
-		Score:     eval.Score,
-		Summary:   eval.Summary,
-		Details:   eval.Details,
-		CreatedAt: eval.CreatedAt.Format(time.RFC3339),
+		ID:                    eval.ID.String(),
+		ResumeID:              eval.ResumeID.String(),
+		JobID:                 eval.JobID.String(),
+		Score:                 eval.Score,
+		Summary:               eval.Summary,
+		Details:               eval.Details,
+		BreakdownKeywordMatch: eval.BreakdownKeywordMatch,
+		BreakdownTechnical:    eval.BreakdownTechnical,
+		BreakdownExperience:   eval.BreakdownExperience,
+		BreakdownImpact:       eval.BreakdownImpact,
+		BreakdownReadability:  eval.BreakdownReadability,
+		MatchedKeywords:       matchedKeywords,
+		MissingKeywords:       missingKeywords,
+		Recommendations:       recommendations,
+		CreatedAt:             eval.CreatedAt.Format(time.RFC3339),
 	}
+}
+
+func deserializeStringSlice(s string) []string {
+	if s == "" {
+		return []string{}
+	}
+	var result []string
+	if err := json.Unmarshal([]byte(s), &result); err != nil {
+		return []string{}
+	}
+	if result == nil {
+		return []string{}
+	}
+	return result
 }
