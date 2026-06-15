@@ -1,0 +1,136 @@
+package resume
+
+import (
+	textextractor "backend/pkg/text_extractor"
+	"database/sql"
+	"errors"
+	"io"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type ResumeServices struct {
+	Repo      *ResumeRepository
+	Extractor *textextractor.TextExtractor
+}
+
+func NewResumeServices(repo *ResumeRepository, extractor *textextractor.TextExtractor) *ResumeServices {
+	return &ResumeServices{
+		Repo:      repo,
+		Extractor: extractor,
+	}
+}
+
+func (s *ResumeServices) Create(userID, originalName string, file io.Reader) (ResumeResponse, error) {
+	rawText, err := s.Extractor.ExtractText(originalName, file)
+	if err != nil {
+		return ResumeResponse{}, err
+	}
+
+	resume := Resume{
+		ID:           uuid.New(),
+		UserID:       uuid.MustParse(userID),
+		OriginalName: originalName,
+		RawText:      rawText,
+		UploadedAt:   time.Now(),
+	}
+
+	err = s.Repo.Create(resume)
+	if err != nil {
+		return ResumeResponse{}, err
+	}
+
+	return s.toResponse(resume), nil
+}
+
+func (s *ResumeServices) GetByID(userID, resumeID string) (ResumeResponse, error) {
+	resume, err := s.Repo.GetByID(resumeID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ResumeResponse{}, errors.New("currículo não encontrado")
+		}
+		return ResumeResponse{}, err
+	}
+
+	if resume.UserID.String() != userID {
+		return ResumeResponse{}, errors.New("currículo não encontrado")
+	}
+
+	return s.toResponse(resume), nil
+}
+
+func (s *ResumeServices) GetByUserID(userID string) ([]ResumeSummaryResponse, error) {
+	resumes, err := s.Repo.GetByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]ResumeSummaryResponse, 0, len(resumes))
+	for _, resume := range resumes {
+		result = append(result, ResumeSummaryResponse{
+			ID:           resume.ID,
+			UserID:       resume.UserID,
+			OriginalName: resume.OriginalName,
+			UploadedAt:   resume.UploadedAt,
+		})
+	}
+
+	return result, nil
+}
+
+func (s *ResumeServices) Update(userID, resumeID, originalName string, file io.Reader) (ResumeResponse, error) {
+	resume, err := s.Repo.GetByID(resumeID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ResumeResponse{}, errors.New("currículo não encontrado")
+		}
+		return ResumeResponse{}, err
+	}
+
+	if resume.UserID.String() != userID {
+		return ResumeResponse{}, errors.New("currículo não encontrado")
+	}
+
+	rawText, err := s.Extractor.ExtractText(originalName, file)
+	if err != nil {
+		return ResumeResponse{}, err
+	}
+
+	resume.OriginalName = originalName
+	resume.RawText = rawText
+	resume.UploadedAt = time.Now()
+
+	err = s.Repo.Update(resume)
+	if err != nil {
+		return ResumeResponse{}, err
+	}
+
+	return s.toResponse(resume), nil
+}
+
+func (s *ResumeServices) Delete(userID, resumeID string) error {
+	resume, err := s.Repo.GetByID(resumeID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("currículo não encontrado")
+		}
+		return err
+	}
+
+	if resume.UserID.String() != userID {
+		return errors.New("currículo não encontrado")
+	}
+
+	return s.Repo.Delete(resumeID)
+}
+
+func (s *ResumeServices) toResponse(resume Resume) ResumeResponse {
+	return ResumeResponse{
+		ID:           resume.ID,
+		UserID:       resume.UserID,
+		OriginalName: resume.OriginalName,
+		RawText:      resume.RawText,
+		UploadedAt:   resume.UploadedAt,
+	}
+}
