@@ -1,4 +1,4 @@
-package atsevaluation
+package ats
 
 type AtsEvaluationResponse struct {
 	ID                    string   `json:"id"`

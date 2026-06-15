@@ -1,7 +1,7 @@
 package http
 
 import (
-	atsevaluation "backend/internal/ats_evaluation"
+	"backend/internal/ats"
 	"backend/internal/auth"
 	"backend/internal/job"
 	"backend/internal/render"
@@ -57,9 +57,9 @@ func RegisterRoutes() http.Handler {
 	optimizationServices := resumeoptimized.NewOptimizationServices(optimizationRepository, resumeRepository, jobRepository, geminiClient)
 	optimizationHandler := resumeoptimized.NewOptimizationHandler(optimizationServices)
 
-	atsEvaluationRepository := atsevaluation.NewAtsEvaluationRepository(db)
-	atsScoringServices := atsevaluation.NewAtsScoringServices(atsEvaluationRepository, resumeRepository, jobRepository, geminiClient)
-	atsScoringHandler := atsevaluation.NewAtsScoringHandler(atsScoringServices)
+	atsEvaluationRepository := ats.NewAtsEvaluationRepository(db)
+	atsScoringServices := ats.NewAtsScoringServices(atsEvaluationRepository, resumeRepository, jobRepository, geminiClient)
+	atsScoringHandler := ats.NewAtsScoringHandler(atsScoringServices)
 
 	typstRenderService := render.NewTypstRenderService()
 	renderHandler := render.NewRenderHandler(optimizationServices, typstRenderService)

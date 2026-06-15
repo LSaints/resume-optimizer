@@ -464,16 +464,6 @@ func (s *OptimizationServices) Delete(userID, optimizationID string) error {
 	return s.OptRepo.Delete(optimizationID)
 }
 
-func (s *OptimizationServices) toResponse(opt ResumeOptimized) OptimizeResponse {
-	return OptimizeResponse{
-		ID:           opt.ID.String(),
-		ResumeID:     opt.ResumeID.String(),
-		JobID:        opt.JobID.String(),
-		TypstContent: opt.TypstContent,
-		CreatedAt:    opt.CreatedAt.Format(time.RFC3339),
-	}
-}
-
 func extractTypstContent(raw string) string {
 	raw = strings.TrimSpace(raw)
 

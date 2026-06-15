@@ -1,11 +1,10 @@
 package auth
 
 import (
+	"backend/internal/user"
 	"errors"
 	"os"
 	"time"
-
-	"backend/internal/user"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"

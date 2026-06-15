@@ -1,4 +1,4 @@
-package atsevaluation
+package ats
 
 import (
 	"time"
